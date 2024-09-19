@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Bakaláři</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="./style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Status Bakaláři Třebešín</h1>
+        <div id="status" class="status">
+            <span class="status-icon">🔄</span> Checking status..
+        </div>
+        <div class="footer">
+            Status last updated: <span id="last-updated">Checking...</span><br>
+            Site made by: <a href="https://discord.com/users/437532245574680577" target="_blank">zu0t</a>
+        </div>
+    </div>
+
+    <script>
+        function timeout(ms) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => reject(new Error('Timeout')), ms);
+            });
+        }
+
+        async function checkBakalariStatus() {
+            const statusDiv = document.getElementById('status');
+            const lastUpdated = document.getElementById('last-updated');
+            const statusIcon = document.querySelector('.status-icon');
+            const currentDateTime = new Date().toLocaleString();
+
+            try {
+                const response = await Promise.race([
+                    fetch('https://bakalari.trebesin.cz/', { method: 'HEAD' }),
+                    timeout(6000) 
+                ]);
+
+                if (response.ok) {
+                    statusDiv.innerHTML = '<span class="status-icon">✅</span> Bakaláře jsou online';
+                    statusDiv.classList.add('online');
+                    statusDiv.classList.remove('offline');
+                } else {
+                    throw new Error('Site is not reachable');
+                }
+
+                lastUpdated.textContent = currentDateTime;
+            } catch (error) {
+                statusDiv.innerHTML = '<span class="status-icon">❌</span> Servery jsou offline';
+                statusDiv.classList.add('offline');
+                statusDiv.classList.remove('online');
+                lastUpdated.textContent = currentDateTime;
+            }
+        }
+
+        checkBakalariStatus();
+
+        setInterval(checkBakalariStatus, 300000);
+    </script>
+</body>
+</html>
